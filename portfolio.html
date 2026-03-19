@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Job Finder – Project Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+/* ─── Variables ──────────────────────────────────────── */
+:root {
+  --bg: #04040a;
+  --surface: #0d0d1a;
+  --surface2: #12122b;
+  --accent: #7c5cfc;
+  --accent2: #00e5a0;
+  --accent3: #ff6b6b;
+  --text: #f0f0fa;
+  --muted: #8888aa;
+  --border: rgba(124,92,252,0.18);
+  --glow: rgba(124,92,252,0.35);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ─── Custom Cursor ──────────────────────────────────── */
+.cursor {
+  width: 12px; height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.1s, opacity 0.2s;
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9998;
+  transition: transform 0.18s ease, width 0.2s, height 0.2s;
+  mix-blend-mode: screen;
+}
+
+/* ─── Noise Overlay ──────────────────────────────────── */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Background Grid ────────────────────────────────── */
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(124,92,252,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,92,252,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Nav ────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 48px;
+  backdrop-filter: blur(20px);
+  background: rgba(4,4,10,0.7);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.25rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+.nav-links { display: flex; gap: 32px; }
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+  letter-spacing: 0.3px;
+}
+.nav-links a:hover { color: var(--text); }
+
+/* ─── Hero ───────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  position: relative;
+  padding: 0 24px;
+  overflow: hidden;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  pointer-events: none;
+}
+.orb-1 { width: 600px; height: 600px; background: var(--accent); top: -200px; left: -200px; animation: drift1 12s ease-in-out infinite alternate; }
+.orb-2 { width: 400px; height: 400px; background: var(--accent2); bottom: -100px; right: -100px; animation: drift2 10s ease-in-out infinite alternate; }
+.orb-3 { width: 300px; height: 300px; background: var(--accent3); top: 50%; left: 50%; transform: translate(-50%,-50%); animation: pulse 7s ease-in-out infinite; }
+
+@keyframes drift1 { to { transform: translate(60px, 40px); } }
+@keyframes drift2 { to { transform: translate(-40px, -60px); } }
+@keyframes pulse { 0%,100% { opacity: 0.15; transform: translate(-50%,-50%) scale(1); } 50% { opacity: 0.25; transform: translate(-50%,-50%) scale(1.2); } }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border);
+  background: rgba(124,92,252,0.08);
+  border-radius: 100px;
+  padding: 6px 18px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--accent2);
+  margin-bottom: 28px;
+  letter-spacing: 0.5px;
+  position: relative; z-index: 1;
+  opacity: 0; transform: translateY(20px);
+  animation: fadeUp 0.7s ease forwards 0.2s;
+}
+.badge-dot { width: 7px; height: 7px; background: var(--accent2); border-radius: 50%; animation: blink 2s infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -3px;
+  position: relative; z-index: 1;
+  opacity: 0; transform: translateY(30px);
+  animation: fadeUp 0.8s ease forwards 0.4s;
+}
+.hero-title .line1 { display: block; color: var(--text); }
+.hero-title .line2 {
+  display: block;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
+  background-size: 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite 1.2s;
+}
+@keyframes shimmer { 0% { background-position: 0%; } 100% { background-position: 200%; } }
+
+.hero-sub {
+  font-size: 1.15rem;
+  color: var(--muted);
+  max-width: 560px;
+  margin: 24px auto 0;
+  line-height: 1.7;
+  font-weight: 300;
+  position: relative; z-index: 1;
+  opacity: 0; transform: translateY(20px);
+  animation: fadeUp 0.7s ease forwards 0.6s;
+}
+
+.hero-cta {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  margin-top: 40px;
+  position: relative; z-index: 1;
+  opacity: 0; transform: translateY(20px);
+  animation: fadeUp 0.7s ease forwards 0.8s;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, var(--accent), #9b5de5);
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 30px var(--glow);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px var(--glow); }
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-outline:hover { background: rgba(124,92,252,0.08); border-color: var(--accent); }
+
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+/* ─── Stats Strip ────────────────────────────────────── */
+.stats-strip {
+  display: flex; justify-content: center; gap: 0;
+  position: relative; z-index: 1;
+  margin-top: 64px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  width: 100%;
+  opacity: 0;
+  animation: fadeUp 0.7s ease forwards 1s;
+}
+.stat-item {
+  flex: 1; max-width: 220px;
+  text-align: center;
+  padding: 28px 24px;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.stat-label { color: var(--muted); font-size: 0.8rem; margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+/* ─── Section ────────────────────────────────────────── */
+section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 96px 24px;
+  position: relative; z-index: 1;
+}
+.section-label {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: 56px;
+}
+.section-title span { color: var(--accent2); }
+
+/* ─── Feature Cards ──────────────────────────────────── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+.feature-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  cursor: default;
+}
+.feature-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent);
+  box-shadow: 0 20px 60px rgba(124,92,252,0.15);
+}
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  display: block;
+}
+.feature-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.feature-desc {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+.feature-tech {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 20px;
+}
+.tech-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: rgba(124,92,252,0.12);
+  color: var(--accent);
+  border: 1px solid rgba(124,92,252,0.2);
+}
+
+/* ─── Architecture Diagram ───────────────────────────── */
+.arch-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 48px;
+  overflow-x: auto;
+}
+.arch-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.arch-node {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 22px;
+  text-align: center;
+  min-width: 130px;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.arch-node:hover { border-color: var(--accent2); transform: scale(1.04); }
+.arch-node-icon { font-size: 1.8rem; }
+.arch-node-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-top: 6px; letter-spacing: 0.3px; }
+.arch-arrow {
+  color: var(--accent);
+  font-size: 1.4rem;
+  margin: 0 4px;
+  opacity: 0.6;
+}
+
+/* ─── Terminal Block ─────────────────────────────────── */
+.terminal {
+  background: #080812;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+}
+.terminal-bar {
+  background: var(--surface2);
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+.terminal-body { padding: 28px; font-size: 0.85rem; line-height: 2; }
+.t-comment { color: #444; }
+.t-cmd { color: var(--accent2); }
+.t-dir { color: var(--accent); }
+.t-output { color: #8888aa; }
+.t-success { color: #00e5a0; }
+.t-cursor { display: inline-block; width: 8px; height: 16px; background: var(--accent2); animation: blink 1s infinite; vertical-align: middle; }
+
+/* ─── Tech Stack ─────────────────────────────────────── */
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.stack-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex; align-items: center; gap: 16px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.stack-card:hover { border-color: var(--accent2); transform: translateX(4px); }
+.stack-icon { font-size: 2rem; }
+.stack-info { flex: 1; }
+.stack-name { font-weight: 600; font-size: 0.95rem; }
+.stack-role { color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+
+/* ─── CTA Section ────────────────────────────────────── */
+.cta-section {
+  text-align: center;
+  background: linear-gradient(135deg, rgba(124,92,252,0.08), rgba(0,229,160,0.05));
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 80px 40px;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content:'';
+  position: absolute;
+  top: -100px; left: 50%;
+  transform: translateX(-50%);
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(124,92,252,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: -2px;
+  margin-bottom: 20px;
+}
+.cta-sub { color: var(--muted); font-size: 1.05rem; margin-bottom: 40px; }
+
+/* ─── Footer ─────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  text-align: center;
+  padding: 32px 24px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  position: relative; z-index: 1;
+}
+
+/* ─── Floating Particles ─────────────────────────────── */
+.particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.particle {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: float linear infinite;
+  opacity: 0;
+}
+@keyframes float {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+}
+
+/* ─── Scroll Reveal ──────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 768px) {
+  nav { padding: 16px 24px; }
+  .nav-links { display: none; }
+  .stats-strip { flex-wrap: wrap; }
+  .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .arch-box { padding: 24px; }
+  body { cursor: auto; }
+  .cursor, .cursor-ring { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">🚀 AI Job Finder</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#stack">Stack</a>
+    <a href="#deploy">Deploy</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    AI-Powered · NLP · Recommendation System
+  </div>
+
+  <h1 class="hero-title">
+    <span class="line1">Find Jobs.</span>
+    <span class="line2">With AI.</span>
+  </h1>
+
+  <p class="hero-sub">
+    An intelligent platform that automates job discovery, matches your resume with 
+    85K+ listings using cosine similarity, analyzes ATS scores, and applies for you.
+  </p>
+
+  <div class="hero-cta">
+    <a href="https://share.streamlit.io" target="_blank" class="btn-primary">
+      ⚡ Live Demo
+    </a>
+    <a href="https://github.com" target="_blank" class="btn-outline">
+      ⭐ View on GitHub
+    </a>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat-item"><div class="stat-val" data-target="94">0</div><div class="stat-label">Match Accuracy %</div></div>
+    <div class="stat-item"><div class="stat-val" data-target="85">0</div><div class="stat-label">K+ Jobs Scraped</div></div>
+    <div class="stat-item"><div class="stat-val" data-target="12">0</div><div class="stat-label">K+ Resumes Parsed</div></div>
+    <div class="stat-item"><div class="stat-val" data-target="3">0</div><div class="stat-label">Platforms Integrated</div></div>
+  </div>
+</div>
+
+<!-- Features -->
+<section id="features">
+  <div class="section-label">What It Does</div>
+  <h2 class="section-title reveal">Six <span>AI-powered</span><br>modules working together</h2>
+
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <span class="feature-icon">📄</span>
+      <div class="feature-title">Resume Parser</div>
+      <div class="feature-desc">NLP-based extraction of skills, experience, education, and contact details from PDF/DOCX resumes. Converts extracted data into 384-dim sentence embeddings.</div>
+      <div class="feature-tech">
+        <span class="tech-tag">spaCy</span>
+        <span class="tech-tag">Sentence Transformers</span>
+        <span class="tech-tag">pdfplumber</span>
+        <span class="tech-tag">Regex</span>
+      </div>
+    </div>
+
+    <div class="feature-card reveal">
+      <span class="feature-icon">🌐</span>
+      <div class="feature-title">Job Scraper</div>
+      <div class="feature-desc">Collects real-time job listings from LinkedIn, Indeed, and Naukri. Converts job descriptions into embeddings for semantic comparison with resumes.</div>
+      <div class="feature-tech">
+        <span class="tech-tag">Selenium</span>
+        <span class="tech-tag">BeautifulSoup</span>
+        <span class="tech-tag">Requests</span>
+        <span class="tech-tag">Playwright</span>
+      </div>
+    </div>
+
+    <div class="feature-card reveal">
+      <span class="feature-icon">🎯</span>
+      <div class="feature-title">Recommendation Engine</div>
+      <div class="feature-desc">Ranks jobs using cosine similarity between resume and job embeddings. Combines embedding similarity (60%) with skill overlap score (40%) for precise matching.</div>
+      <div class="feature-tech">
+        <span class="tech-tag">Cosine Similarity</span>
+        <span class="tech-tag">NumPy</span>
+        <span class="tech-tag">Embeddings</span>
+        <span class="tech-tag">ML Ranking</span>
+      </div>
+    </div>
+
+    <div class="feature-card reveal">
+      <span class="feature-icon">📊</span>
+      <div class="feature-title">ATS Score Analyzer</div>
+      <div class="feature-desc">Compares resume against job descriptions, identifies missing skills, and provides AI-generated suggestions to improve ATS score and beat applicant filters.</div>
+      <div class="feature-tech">
+        <span class="tech-tag">Keyword Matching</span>
+        <span class="tech-tag">Gap Analysis</span>
+        <span class="tech-tag">TF-IDF</span>
+        <span class="tech-tag">NLP</span>
+      </div>
+    </div>
+
+    <div class="feature-card reveal">
+      <span class="feature-icon">🤖</span>
+      <div class="feature-title">RAG Career Assistant</div>
+      <div class="feature-desc">Retrieval-Augmented Generation system that answers career questions by fetching relevant knowledge from a vector database and generating personalized advice with an LLM.</div>
+      <div class="feature-tech">
+        <span class="tech-tag">RAG</span>
+        <span class="tech-tag">Vector DB</span>
+        <span class="tech-tag">LLM</span>
+        <span class="tech-tag">Chroma</span>
+      </div>
+    </div>
+
+    <div class="feature-card reveal">
+      <span class="feature-icon">⚡</span>
+      <div class="feature-title">Auto Apply Bot</div>
+      <div class="feature-desc">Browser automation bot that fills application forms and submits them automatically. Includes a ML feedback loop that learns from clicks and applications to improve recommendations.</div>
+      <div class="feature-tech">
+        <span class="tech-tag">Selenium</span>
+        <span class="tech-tag">Playwright</span>
+        <span class="tech-tag">ML Feedback</span>
+        <span class="tech-tag">Automation</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Architecture -->
+<section id="architecture">
+  <div class="section-label">System Design</div>
+  <h2 class="section-title reveal">How the <span>pipeline</span><br>flows end-to-end</h2>
+
+  <div class="arch-box reveal">
+    <div class="arch-flow">
+      <div class="arch-node">
+        <div class="arch-node-icon">👤</div>
+        <div class="arch-node-label">User Upload</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">📄</div>
+        <div class="arch-node-label">NLP Parser</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🔢</div>
+        <div class="arch-node-label">Embeddings</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">📐</div>
+        <div class="arch-node-label">Cosine Sim.</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🎯</div>
+        <div class="arch-node-label">Top Jobs</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">⚡</div>
+        <div class="arch-node-label">Auto Apply</div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;padding-top:32px;border-top:1px solid var(--border)">
+      <div style="color:var(--muted);font-size:0.8rem;margin-bottom:16px;font-weight:600;letter-spacing:1px;text-transform:uppercase">Parallel Services</div>
+      <div class="arch-flow">
+        <div class="arch-node">
+          <div class="arch-node-icon">🌐</div>
+          <div class="arch-node-label">LinkedIn Scraper</div>
+        </div>
+        <div class="arch-arrow">+</div>
+        <div class="arch-node">
+          <div class="arch-node-icon">🔍</div>
+          <div class="arch-node-label">Indeed Scraper</div>
+        </div>
+        <div class="arch-arrow">+</div>
+        <div class="arch-node">
+          <div class="arch-node-icon">🇮🇳</div>
+          <div class="arch-node-label">Naukri Scraper</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">
+          <div class="arch-node-icon">🗄️</div>
+          <div class="arch-node-label">Vector DB</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">
+          <div class="arch-node-icon">🤖</div>
+          <div class="arch-node-label">RAG Assistant</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Deploy -->
+<section id="deploy">
+  <div class="section-label">Quick Start</div>
+  <h2 class="section-title reveal">Deploy in <span>3 steps</span></h2>
+
+  <div class="terminal reveal">
+    <div class="terminal-bar">
+      <div class="terminal-dot" style="background:#ff5f57"></div>
+      <div class="terminal-dot" style="background:#ffbd2e"></div>
+      <div class="terminal-dot" style="background:#28ca41"></div>
+      <span style="color:var(--muted);font-size:0.8rem;margin-left:8px">bash — ai-job-finder</span>
+    </div>
+    <div class="terminal-body">
+      <div class="t-comment"># Step 1: Clone the repository</div>
+      <div><span class="t-dir">~$</span> <span class="t-cmd">git clone https://github.com/YOUR_USERNAME/ai-job-finder.git</span></div>
+      <div class="t-output">Cloning into 'ai-job-finder'... done.</div>
+      <br>
+      <div class="t-comment"># Step 2: Install dependencies</div>
+      <div><span class="t-dir">~/ai-job-finder$</span> <span class="t-cmd">pip install -r requirements.txt</span></div>
+      <div class="t-output">Successfully installed streamlit-1.35.0 ✓</div>
+      <br>
+      <div class="t-comment"># Step 3: Run locally</div>
+      <div><span class="t-dir">~/ai-job-finder$</span> <span class="t-cmd">streamlit run app.py</span></div>
+      <div class="t-success">✓ App running at http://localhost:8501</div>
+      <br>
+      <div class="t-comment"># Or deploy to Streamlit Cloud — it's free!</div>
+      <div><span class="t-dir">~/ai-job-finder$</span> <span class="t-cmd">git push origin main</span> <span class="t-comment"># then go to share.streamlit.io</span></div>
+      <div class="t-success">✓ Deployed! &nbsp;<span class="t-cursor"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Stack -->
+<section id="stack">
+  <div class="section-label">Technology</div>
+  <h2 class="section-title reveal">Built with the <span>right tools</span></h2>
+
+  <div class="stack-grid reveal">
+    <div class="stack-card"><div class="stack-icon">🐍</div><div class="stack-info"><div class="stack-name">Python</div><div class="stack-role">Core backend language</div></div></div>
+    <div class="stack-card"><div class="stack-icon">🌊</div><div class="stack-info"><div class="stack-name">Streamlit</div><div class="stack-role">Frontend dashboard</div></div></div>
+    <div class="stack-card"><div class="stack-icon">🤗</div><div class="stack-info"><div class="stack-name">Hugging Face</div><div class="stack-role">Sentence Transformers</div></div></div>
+    <div class="stack-card"><div class="stack-icon">📐</div><div class="stack-info"><div class="stack-name">NumPy</div><div class="stack-role">Cosine similarity</div></div></div>
+    <div class="stack-card"><div class="stack-icon">🕷️</div><div class="stack-info"><div class="stack-name">Selenium</div><div class="stack-role">Job scraping & auto-apply</div></div></div>
+    <div class="stack-card"><div class="stack-icon">🗄️</div><div class="stack-info"><div class="stack-name">ChromaDB</div><div class="stack-role">Vector database (RAG)</div></div></div>
+    <div class="stack-card"><div class="stack-icon">🧠</div><div class="stack-info"><div class="stack-name">spaCy</div><div class="stack-role">NLP & entity extraction</div></div></div>
+    <div class="stack-card"><div class="stack-icon">🚀</div><div class="stack-info"><div class="stack-name">GitHub Actions</div><div class="stack-role">CI/CD pipeline</div></div></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section>
+  <div class="cta-section reveal">
+    <div class="section-label" style="margin-bottom:20px">Open Source</div>
+    <h2 class="cta-title">Ready to <span style="background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">deploy?</span></h2>
+    <p class="cta-sub">Full source code on GitHub. Deploy to Streamlit Cloud in under 2 minutes.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      <a href="https://share.streamlit.io" target="_blank" class="btn-primary">⚡ Live Demo</a>
+      <a href="https://github.com" target="_blank" class="btn-outline">📦 GitHub Repo</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Built with ❤️ using Python · Streamlit · NLP · Machine Learning</p>
+  <p style="margin-top:8px;opacity:0.5">AI Job Finder — Open Source Project</p>
+</footer>
+
+<script>
+// Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function animCursor() {
+  cursor.style.transform = `translate(${mx-6}px,${my-6}px)`;
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.transform = `translate(${rx-18}px,${ry-18}px)`;
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+document.querySelectorAll('a,button,.feature-card,.stack-card').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.style.transform += ' scale(2)'; ring.style.width = '60px'; ring.style.height = '60px'; });
+  el.addEventListener('mouseleave', () => { ring.style.width = '36px'; ring.style.height = '36px'; });
+});
+
+// Particles
+const pContainer = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + 'vw';
+  p.style.animationDuration = (8 + Math.random() * 14) + 's';
+  p.style.animationDelay = (Math.random() * 12) + 's';
+  p.style.width = p.style.height = (1 + Math.random() * 2) + 'px';
+  p.style.background = Math.random() > 0.5 ? 'var(--accent)' : 'var(--accent2)';
+  pContainer.appendChild(p);
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Counter animation
+function animateCounter(el, target) {
+  let current = 0;
+  const step = target / 60;
+  const timer = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(timer); }
+    el.textContent = Math.floor(current);
+  }, 25);
+}
+const counterObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const target = parseInt(e.target.dataset.target);
+      animateCounter(e.target, target);
+      counterObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('[data-target]').forEach(el => counterObserver.observe(el));
+</script>
+</body>
+</html>
